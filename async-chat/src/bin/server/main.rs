@@ -9,7 +9,7 @@ mod group_table;
 use connection::serve;
 
 fn main() -> ChatResult<()> {
-    let address = std::env::args().nth(1).expect("Usage: server ADRESS");
+    let address = std::env::args().nth(1).expect("使用方法: server アドレス");
 
     let chat_group_table = Arc::new(group_table::GroupTable::new());
 

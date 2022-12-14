@@ -28,7 +28,7 @@ pub async fn serve(socket: TcpStream, gourps: Arc<GroupTable>) -> ChatResult<()>
                     group.post(message);
                     Ok(())
                 }
-                None => Err(format!("Group '{}' does not exist", group_name)),
+                None => Err(format!("グループ '{}' は存在しません.", group_name)),
             },
         };
         if let Err(message) = result {

@@ -25,7 +25,7 @@ fn parse_command(line: &str) -> Option<FromClient> {
             group_name: Arc::new(group.to_string()),
         });
     } else {
-        eprint!("Unrecognized command: {:?}", line);
+        eprint!("不明なコマンドです: {:?}", line);
         return None;
     }
 }
@@ -43,13 +43,14 @@ fn get_next_token(mut input: &str) -> Option<(&str, &str)> {
     }
 }
 
+// メッセージ送信ロジック
 async fn send_commands(mut to_server: net::TcpStream) -> ChatResult<()> {
     println!(
-        "Commands:\n\
-        join GROUP\n\
-        post GROUP MESSAGE...\n\
-        Type Control-D (on Unix) or Control-Z (on Windows) \
-        to close the connection."
+        "コマンド:\n\
+        チャット参加: join グループ名\n\
+        メッセージ送信: post グループ名 メッセージ...\n\
+        Ctrl+D (ユニックス系) または Ctrl+Z (Windows) \
+        接続を切断."
     );
     let mut commands_lines = io::BufReader::new(io::stdin()).lines();
     while let Some(command_result) = commands_lines.next().await {
@@ -67,6 +68,7 @@ async fn send_commands(mut to_server: net::TcpStream) -> ChatResult<()> {
 
 use async_chat::FromServer;
 
+// 受信メッセージ表示ロジック
 async fn handle_replies(from_server: net::TcpStream) -> ChatResult<()> {
     let buffered = io::BufReader::new(from_server);
     let mut reply_stream = utils::receive_as_json(buffered);
@@ -77,10 +79,10 @@ async fn handle_replies(from_server: net::TcpStream) -> ChatResult<()> {
                 group_name,
                 message,
             } => {
-                println!("message posted to {}: {}", group_name, message);
+                println!("{}にメッセージ'{}'を送信.", group_name, message);
             }
             FromServer::Error(message) => {
-                println!("error from server: {}", message);
+                println!("サーバーエラー: {}", message);
             }
         }
     }
@@ -91,7 +93,9 @@ async fn handle_replies(from_server: net::TcpStream) -> ChatResult<()> {
 use async_std::task;
 
 fn main() -> ChatResult<()> {
-    let address = std::env::args().nth(1).expect("Usage: client ADDRESS:PORT");
+    let address = std::env::args()
+        .nth(1)
+        .expect("使用方法: client アドレス:ポート");
 
     task::block_on(async {
         let socket = net::TcpStream::connect(address).await?;

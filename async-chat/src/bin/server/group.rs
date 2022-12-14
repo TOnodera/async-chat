@@ -41,9 +41,10 @@ async fn handle_subscriver(
                 group_name: group_name.clone(),
                 message: message.clone(),
             },
-            Err(RecvError::Lagged(n)) => {
-                FromServer::Error(format!("Dropped {} messages from {}.", n, group_name))
-            }
+            Err(RecvError::Lagged(n)) => FromServer::Error(format!(
+                "{} から {} 個のメッセージを受信できませんでした.",
+                group_name, n
+            )),
             Err(RecvError::Closed) => break,
         };
 
